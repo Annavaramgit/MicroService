@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+##this means when the user click movie-info url with using api gateway port number then api-gateways routes correspondent micro-service
+##then user/cleint no need to remember microservices portnums's  and servers's
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: movie-catalog-service
+            uri: http://localhost:8091
+            predicates:
+              - Path=/movie-info/**
+          - id: movie-streaming-service
+            uri: http://localhost:8092
+            predicates:
+              - Path=/movie-stream/**
+
+  application:
+    name: api-gateway

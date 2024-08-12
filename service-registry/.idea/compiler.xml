@@ -2,10 +2,13 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="api-gateway" />
+        <module name="movie-streaming-service" />
         <module name="service-registry" />
         <module name="movie-catalog-service" />
       </profile>
@@ -13,7 +16,9 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway" options="-parameters" />
       <module name="movie-catalog-service" options="-parameters" />
+      <module name="movie-streaming-service" options="-parameters" />
       <module name="service-registry" options="-parameters" />
     </option>
   </component>

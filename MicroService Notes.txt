@@ -1,0 +1,106 @@
+
+MicroServices
+======================
+
+-->microservices are modern approach in software where by application code devided in small, managable pieces,independent to others.
+-->microservices are small small services they work together 
+-->microservices are loosely coupled ->( meaning that changes to one service should not affect the other services )
+-->it is distributed environemt =>not all application code at one place (based on modules devided diff applications)
+
+
+Monolith Archetecture
+===========================
+-->Single and large Code Base  => whole code application available at one place
+-->Single Stack                =>every modules in the application developed by one progarmming language(like java)
+-->one time deployement for entire project=> means in the application if single modules got any issue then project not deployed 
+-->tightly coupled =>all modules are tightly coupled each other
+-->it is centalized environment  =>all application available at one place
+
+
+MicroServices Communication
+====================================
+-->one micro service communicates with another microservice
+-->there are ways for micro service communication
+1)Synchronous 
+2)Asyncronous
+
+
+1)Synchronous 
+-----------------
+-->it means ,if one micro service send request another micro service 
+-->in this sending micro service waits for the second micro service response
+-->RestTemplate,SpringCloud using communications are Synchronous 
+
+ex:
+-----
+phone call 
+-->we waited untill another person giving the response
+
+2)Asyncronous
+---------------
+-->it means ,if one micro service send request another micro service 
+-->sending microservice will not wait for the second micro service for the response
+-->RabbitMQ,Kafka are the example
+
+ex:
+-----
+chatting(in whatsapp,etc..)
+-->sending person put the message and not wait or stop his work for the response
+
+
+Micro-service Architecture Components
+=======================================================
+
+Note = for architecture diagram search in google spring microservices(https://spring.io/microservices) then you will get official and in that diagram you will find
+
+Api gateway
+<============>
+-->api gateway acts like gate for microservices
+-->means every request go through this gateway only
+-->every request come to api-gateway first  and then it will route correspondent micro-service
+-->Api Gateway simplifies complexity of client & microservices communication
+
+
+
+ConfigServer
+<=============>
+--> Actually a multiple micro-servives are develped in the micro-service based application
+-->each micro-service is a application
+-->so each application needs configurations
+-->in ConfigServer means all the micro-services confifgurations are maintained here only
+-->it is a centralized configurations maintainer
+-->if i want change any particular micro-service configurations then no need to go that particular micro-service in configServer we can easily change
+
+
+Circuit breaker
+<=====================>
+-->if two micro-services are there(One,Two)
+-->if Two micro-service needs One microservice data
+-->in case if One micro-service fails or notworking
+-->that time we need to handle bcz Two micro-service don't know One micro-service is not working
+-->for handling this kind of situation Circuit Breaker need to use
+
+message borker
+<===================>
+-->apache kafka is a message broker
+-->for communication of micro-service this message broker used
+
+ex:zomato app
+------------------
+-->first order request came to one micro-service 
+-->that micro-service intimate to kafka like hey order req came from clinet
+-->then after payment micro-service handles payment process 
+-->then payment handled micro-service intimate to kafka like either payment =sucess or payment=failure
+-->based on kafka message sucess failure remaing will happen 
+
+
+service-regstry
+<===================>
+-->for communication of micro-service then micro-service n/w location of that commuinicated micro-service then only communicate
+-->instaed of hardcoding n/w location use eurka server 
+-->euraka server is a service-registry and discovery server or sevice
+-->when the micro-services running/startup they registed in the euraka server itself then euraka know his n/w location
+-->so through this eureka micro-services communicate each other
+
+
+
