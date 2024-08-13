@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: service-registry # Name of your Eureka server application
+server:
+  port: 8761 # Port on which the Eureka server will run
+
+eureka:
+  instance:
+    hostname: localhost # Hostname for the Eureka server instance
+
+  client:
+    fetch-registry: false # Eureka server does not fetch registry information from other Eureka servers
+    register-with-eureka: false # Eureka server does not register itself with another Eureka server (since it's the server itself)
+
+logging:
+  level:
+    com.netflix.eureka: DEBUG # Enable debug-level logging for Eureka
+    org.springframework.cloud.netflix.eureka: DEBUG # Enable debug-level logging for Spring Cloud Netflix Eureka

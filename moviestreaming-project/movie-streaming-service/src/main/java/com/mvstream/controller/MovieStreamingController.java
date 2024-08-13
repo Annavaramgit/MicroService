@@ -1,5 +1,6 @@
 package com.mvstream.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +15,25 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 @RestController
+@Slf4j
 @RequestMapping("/movie-stream")
+
 public class MovieStreamingController {
+
+    /* Main directory of the video*/
     public static final String VIDEO_DIRECTORY = "C:\\Users\\Sreenivas Bandaru\\Documents\\Microservices\\";
+
+    public final CallMovieCatalogInfo callMovieCatalogInfo;
+    public MovieStreamingController(CallMovieCatalogInfo callMovieCatalogInfo) {
+        this.callMovieCatalogInfo = callMovieCatalogInfo;
+    }
+
 
     /* for diplay or play video in the output */
     @GetMapping("/movie/{path}")
     public ResponseEntity<InputStreamResource> streamVideo(@PathVariable String path) throws FileNotFoundException {
+        log.info("-->streamVideo method executed<--");
+
         File file = new File(VIDEO_DIRECTORY + path);
         if (file.exists()) {
             InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
@@ -30,6 +43,18 @@ public class MovieStreamingController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /* for diplay or play video in the output */
+    @GetMapping("/movieWithId/{id}")
+    public ResponseEntity<InputStreamResource> streamVideoWithId(@PathVariable long id) throws FileNotFoundException {
+        log.info("{MovieId is {}--->"+id);
+        String moviePath = callMovieCatalogInfo.getMoviePath(id);
+        log.info("Path Is--->{}"+moviePath);
+        /* this calls above method along with passing video path */
+        return streamVideo(moviePath);
+
+
     }
 
 }

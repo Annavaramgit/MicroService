@@ -1,9 +1,0 @@
-spring:
-  application:
-    name: movie-streaming-service
-server:
-  port: 8092
-eureka:
-  client:
-    server-url:
-      defaultZone: http://localhost:8761/eureka
