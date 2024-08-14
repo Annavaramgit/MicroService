@@ -5,10 +5,11 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 spring:
+  profiles:
+    active: native
   cloud:
     config:
       server:
         native:
-          search-location: C:\\config #this means we given configurations in the location
-  profiles:
-    active: native
+          search-locations: file:///C:/config
+
