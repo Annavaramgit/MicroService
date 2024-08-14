@@ -13,11 +13,11 @@ spring:
       mvc:
         routes:
           - id: movie-catalog-service
-            uri: http://localhost:8091
+            uri: lb://MOVIE-CATALOG-SERVICE
             predicates:
               - Path=/movie-info/**
           - id: movie-streaming-service
-            uri: http://localhost:8092
+            uri: lb://MOVIE-STREAMING-SERVICE
             predicates:
               - Path=/movie-stream/**
 

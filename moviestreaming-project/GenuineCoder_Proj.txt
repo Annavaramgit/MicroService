@@ -1,0 +1,179 @@
+project
+================
+-->project is related to movies-streaming
+-->one micro-service have movies details,another do streaming the movies/vidoes
+
+
+what used
+==============
+-->to do this project
+1)Api gateway
+2)eurka-server
+3)zipkin  =>tracing the request life cycle
+4)two micro-services(Movie-Catalog-Service,Movie-Streaming-Service)
+
+
+
+Eureka-Server creation
+=============================
+1)go to Spring initializr
+
+2)create a project add dependencies
+-------------------------------------------
+web,devtools,eureka server,config client(this is for config server)
+
+3)in the main class(annotated with @SpringBootApplication) add
+            @EnableEurekaServer
+annotation alsothis annotation used for enabling eureka server
+
+4)in application.yml file  
+--------------------------------
+spring:
+  application:
+    name: service-registry
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    fetch-registry: false
+    register-with-eureka: false  #->these two are used for ,actually eureka server also one micro-servive so this should not as act like client to eureka server
+
+
+
+5)start the application and hit http://localhost:8761 in the browser then you will get eureka dash board
+
+
+1)Movie-Catalog-Service
+==================================
+-->this is one of the micro-service
+-->it have movie's information
+
+to develop this-->it is like normal spring boot project
+dependecies are
+----------------------------
+-->lombok,web,eureka discovery client,devtools,jpa,my-sql connector,config client(this is for config server),etc(needed)
+
+1)add @EnableDiscoveryClient in the main cls(annotated with @SpringBootApplication)
+2)add below properties in the application.yml file
+
+spring:
+  application:
+    name: movie-catalog-service
+server:
+  port: 8091
+eureka:
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka
+
+
+3)remaining code available at(movie-catalog-service project)
+4)run it will register in the eureka server
+
+
+
+
+2)Movie-Streaming-Service
+================================
+-->this is second micro-service
+-->it used for stream the vidoes(plays/diplays the vidoes)
+
+to develop this-->it is like normal spring boot project
+dependecies are
+------------------
+-->lombok,web,eureka discovery client,devtools,config client(this is for config server),etc(needed)
+
+-->Cloud LoadBalancer(added recent)(handle load(add this in which service calls another service))
+
+
+
+1)1)add @EnableDiscoveryClient in the main cls(annotated with @SpringBootApplication)
+
+spring:
+  application:
+    name: movie-streaming-service
+server:
+  port: 8092
+eureka:
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka
+
+
+3)remaining code available at(movie-streaming-service project)
+4)run it will register in the eureka server
+
+
+3)Api Gateway creation
+==================================
+-->this is api-gateway so it acts as gate to the application
+-->so every request go throuth this gateway only
+-->for client/user no need to remember all micro-services port number's,etc....
+-->we allow to run the all the micro-service by using api-gateway port-number 
+-->api-wateway is responsile to route the request to correspondent micro-service
+
+1)add dependencies
+--------------------------------------
+eureka discovery client,gateway,config client(this is for config server)
+2)add below propeties
+
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+##this means when the user click movie-info url with using api gateway port number then api-gateways routes correspondent micro-service
+##then user/cleint no need to remember microservices portnums's  and servers's
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: movie-catalog-service
+            uri: http://localhost:8091
+            predicates:
+              - Path=/movie-info/**
+          - id: movie-streaming-service
+            uri: http://localhost:8092
+            predicates:
+              - Path=/movie-stream/**
+
+  application:
+    name: api-gateway
+
+
+
+
+Config Server creattion
+============================================
+-->it is a centralized configurations controller
+-->all the micro-services configurations we put one place (in config server)
+
+
+depedencies
+-------------------
+1.confi server
+2.eureka discovery cleint   ->this is for regisre this also in the eureka server
+
+
+yml file(properties)
+--------------------
+server:
+  port: 8888
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          search-location: C:\\config #this means we given configurations in the location
+  profiles:
+    active: native
+
