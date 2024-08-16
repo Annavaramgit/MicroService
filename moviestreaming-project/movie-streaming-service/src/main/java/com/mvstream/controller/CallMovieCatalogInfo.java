@@ -11,7 +11,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class CallMovieCatalogInfo {
 
     /* path os movie-catalog-service*/
-    public static final String movieCatalogInfoUrl = "http://movie-catalog-service";
+    public static final String movieCatalogInfoUrl = "http://api-gateway";
 
     /*RestTemplate*/
     public final RestTemplate restTemplate;

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.doctor.dto.Patient;
 import com.doctor.entity.DoctorConsultation;
+import com.doctor.open_feign.OpenFeign_interface;
 import com.doctor.service.DoctorConsultationService;
 
 @RestController
@@ -21,18 +23,24 @@ import com.doctor.service.DoctorConsultationService;
 public class DoctorConsultationController {
 
 	public final DoctorConsultationService doctorConsultationService;
-
-	public DoctorConsultationController(DoctorConsultationService doctorConsultationService) {
+	public final  OpenFeign_interface  openFeign_interface;
+	
+	public DoctorConsultationController(DoctorConsultationService doctorConsultationService,OpenFeign_interface  openFeign_interface) {
 		super();
 		this.doctorConsultationService = doctorConsultationService;
+		this.openFeign_interface=openFeign_interface;
 	}
 
 	/* save DoctorConsultation */
 	@PostMapping("/save-DoctorConsultation")
 	public ResponseEntity<DoctorConsultation> saveDoctorConsultation(
-			@RequestBody DoctorConsultation DoctorConsultation) {
+			@RequestBody DoctorConsultation doctorConsultation) {
+		
+		Patient patientDetails = openFeign_interface.getPatientDetails(doctorConsultation.getPatientId());
+		System.out.println("-------------------------");
+		System.out.println(patientDetails);
 
-		DoctorConsultation DoctorConsultation1 = doctorConsultationService.saveConsultation(DoctorConsultation);
+		DoctorConsultation DoctorConsultation1 = doctorConsultationService.saveConsultation(doctorConsultation);
 
 		if (DoctorConsultation1 != null) {
 

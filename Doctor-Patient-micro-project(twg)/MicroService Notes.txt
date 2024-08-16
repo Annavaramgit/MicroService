@@ -103,4 +103,72 @@ service-regstry
 -->so through this eureka micro-services communicate each other
 
 
+OpenFeign
+=======================
+-->it is also like RestTemplate and Webcleint
+-->used for make micro-services communicate each other
 
+
+how to use openfeign
+-----------------------------
+
+-->1.add dependecny  and Add @EnableFeignClients annoatation in the main class(annotated with @SpringBootApplication)
+
+	<dependency>
+	   <groupId>org.springframework.cloud</groupId>
+	   <artifactId>spring-cloud-starter-openfeign</artifactId>
+	</dependency>
+
+ 
+-->2.create an interface with @FeignClient annotation
+	
+	like :-
+
+	  @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	  public interface Feignclient_Interaface
+	  {
+
+	  }
+-->3.add method declaration in the interface and annotated with  to which req your sending(patient-registration-service controller whci end point your sending add whole end point url)
+	
+	like:-
+
+	 @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	  public interface Feignclient_Interaface
+	  {
+		@GetMapping("/patient/get-patient-by-id/{id}")
+		public Patient getPatient(@PathVariable("id") long patientId);   -->create dto package->create class Patient(copy Patient in patient-registration-service service fields into this dto Patient class)
+	  }
+	  
+
+4.call the method of interface in  the where patient details .
+ 	
+	ex:-here i called in the controller where DoctorConsulatation saved time and i just printed the Patient details came from patient-registration-service micro
+
+	@Autowired
+	private OpenFeign_interface  openFeign_interface;
+
+	/* save DoctorConsultation */
+	@PostMapping("/save-DoctorConsultation")
+	public ResponseEntity<DoctorConsultation> saveDoctorConsultation(
+			@RequestBody DoctorConsultation doctorConsultation) {
+		
+		//called the method in  the interface(OpenFeign_interface) for fetching details from another micro
+		Patient patientDetails = openFeign_interface.getPatientDetails(doctorConsultation.getPatientId());
+		System.out.println(patientDetails);
+
+		DoctorConsultation DoctorConsultation1 = doctorConsultationService.saveConsultation(doctorConsultation);
+
+		if (DoctorConsultation1 != null) {
+
+			return new ResponseEntity<>(DoctorConsultation1, HttpStatus.CREATED);
+		} else {
+		
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+		}
+	}
+
+
+
+---

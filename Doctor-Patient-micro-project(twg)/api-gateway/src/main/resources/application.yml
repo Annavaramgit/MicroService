@@ -1,0 +1,27 @@
+spring:
+  cloud:
+    gateway:
+      mvc:
+        routes:         
+          - id: patient-registration-service
+            uri: lb://PATIENT-REGISTRATION-SERVICE
+            predicates:
+              - Path=/patient/**
+          - id: doctor-consultation-service
+            uri:  lb://DOCTOR-CONSULTATION-SERVICE
+            predicates:  
+               - Path=/doctor/**
+            
+          
+
+  application:
+    name: api-gateway
+server:
+  port: 8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+      
+ 

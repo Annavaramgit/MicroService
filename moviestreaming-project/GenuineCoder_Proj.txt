@@ -148,6 +148,365 @@ spring:
 
 
 
+
+How to use RestTemplate
+=================================
+-->RestTemplate is a class by  using this we can make two or more micro-services communicate each other
+-->it  is snchronous
+1.create any package (like config) in that create classs->create bean for the RestTemplate
+2.use the bean where we need to call another micro-service
+
+
+ex:-
+<------------>
+
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+
+@Configuration
+/* This class is for configuration of RestTemplate class */
+
+public class RestTemplateConfig {
+
+    /* RestTemplate is a class which allow us to make micro-services communicate each other*/
+
+    @LoadBalanced
+    @Bean
+    public RestTemplate rest(){
+        return new RestTemplate();
+    }
+}
+
+3.use where we require(call another miro's)
+
+ex:-
+<------------>
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Component
+@Slf4j
+/* This class is for call movie-catlog-g-service for this USed RestTemplate*/
+public class CallMovieCatalogInfo {
+
+    /* path os movie-catalog-service*/
+    public static final String movieCatalogInfoUrl = "http://api-gateway";  //gate-way used here that's why it navige gate-way then gate-way routes correspondent micro
+										//we can give direct that micro service name also instead od api-gateway(but gd practice to give api-gateway)
+    /*RestTemplate*/
+    public final RestTemplate restTemplate;
+
+    public CallMovieCatalogInfo(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+
+    /* This method calls movie-catalog-service micro and get path of the movie for display*/
+    public String getMoviePath(long movieId) {
+
+        var res = restTemplate.getForEntity(movieCatalogInfoUrl + "/movie-info/getPath/{id}", String.class, movieId);
+        log.info("--->getMoviePath is executed and bring path<---" + res.getBody());
+        return res.getBody();
+    }
+
+
+ 
+}
+
+
+
+below controller uses above method 
+<---------------------------------------->
+package com.mvstream.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+@RestController
+@Slf4j
+@RequestMapping("/movie-stream")
+
+public class MovieStreamingController {
+
+    /* Main directory of the video*/
+    public static final String VIDEO_DIRECTORY = "C:\\Users\\Sreenivas Bandaru\\Documents\\Microservices\\";
+
+    public final CallMovieCatalogInfo callMovieCatalogInfo;
+    public MovieStreamingController(CallMovieCatalogInfo callMovieCatalogInfo) {
+        this.callMovieCatalogInfo = callMovieCatalogInfo;
+    }
+
+
+    /* for diplay or play video in the output */
+    @GetMapping("/movie/{path}")
+    public ResponseEntity<InputStreamResource> streamVideo(@PathVariable String path) throws FileNotFoundException {
+        log.info("-->streamVideo method executed<--");
+
+        File file = new File(VIDEO_DIRECTORY + path);
+        if (file.exists()) {
+            InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("video/mp4"))
+                    .body(inputStreamResource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /* for diplay or play video in the output */
+    @GetMapping("/movieWithId/{id}")
+    public ResponseEntity<InputStreamResource> streamVideoWithId(@PathVariable long id) throws FileNotFoundException {
+        log.info("{MovieId is {}--->"+id);
+        String moviePath = callMovieCatalogInfo.getMoviePath(id);
+        log.info("Path Is--->{}"+moviePath);
+        /* this calls above method along with passing video path */
+        return streamVideo(moviePath);
+
+
+    }
+
+}
+
+---
+
+
+How to Use WebClient
+======================================
+-->it  is also like RestTemplate
+-->but it is asynchronous and we can make this synchronous also
+
+
+1.add webflux dependency
+
+ <!-- for webclient use-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+
+2.create package->create class->create bean
+
+package com.mvstream.config;
+
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Configuration
+
+
+public class RestTemplateConfig {
+
+ //the below is for WebClient
+    
+    @Bean
+    @LoadBalanced
+    WebClient.Builder createLoadBalancedBuilder() { return WebClient.builder(); }
+
+    @Bean
+    WebClient client(WebClient.Builder builder) { return builder.build(); }
+     
+}
+
+3.call another micro-service using above bean
+
+package com.mvstream.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Component
+@Slf4j
+/* This class is for call movie-catlog-g-service for this USed WebClient*/
+public class CallMovieCatalogInfo {
+
+    /* path os movie-catalog-service*/
+    public static final String movieCatalogInfoUrl = "http://api-gateway";
+
+
+
+    /* the below is for WebClient */
+
+    public final WebClient webClient;
+
+    public CallMovieCatalogInfo(WebClient webClient) {
+        this.webClient = webClient;
+    }
+
+    public String getMoviePath(long movieId) {
+
+       return webClient.get()
+                .uri(movieCatalogInfoUrl + "/movie-info/getPath/{id}", movieId)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+    }
+
+}
+
+
+below controller uses above method 
+<---------------------------------------->
+package com.mvstream.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
+@RestController
+@Slf4j
+@RequestMapping("/movie-stream")
+
+public class MovieStreamingController {
+
+    /* Main directory of the video*/
+    public static final String VIDEO_DIRECTORY = "C:\\Users\\Sreenivas Bandaru\\Documents\\Microservices\\";
+
+    public final CallMovieCatalogInfo callMovieCatalogInfo;
+    public MovieStreamingController(CallMovieCatalogInfo callMovieCatalogInfo) {
+        this.callMovieCatalogInfo = callMovieCatalogInfo;
+    }
+
+
+    /* for diplay or play video in the output */
+    @GetMapping("/movie/{path}")
+    public ResponseEntity<InputStreamResource> streamVideo(@PathVariable String path) throws FileNotFoundException {
+        log.info("-->streamVideo method executed<--");
+
+        File file = new File(VIDEO_DIRECTORY + path);
+        if (file.exists()) {
+            InputStreamResource inputStreamResource = new InputStreamResource(new FileInputStream(file));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType("video/mp4"))
+                    .body(inputStreamResource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /* for diplay or play video in the output */
+    @GetMapping("/movieWithId/{id}")
+    public ResponseEntity<InputStreamResource> streamVideoWithId(@PathVariable long id) throws FileNotFoundException {
+        log.info("{MovieId is {}--->"+id);
+        String moviePath = callMovieCatalogInfo.getMoviePath(id);
+        log.info("Path Is--->{}"+moviePath);
+        /* this calls above method along with passing video path */
+        return streamVideo(moviePath);
+
+
+    }
+
+}
+
+---
+
+
+
+How to use OpenFeign
+==================================
+-->it is also used for make micro-services communicating each other
+-->it is also like RestTemplate and Webcleint
+-->used for make micro-services communicate each other
+
+Note=this openfeign used in doctor-patient-micro-project(twg) not in this project
+
+-->1.add dependecny  and Add @EnableFeignClients annoatation in the main class(annotated with @SpringBootApplication)
+
+	<dependency>
+	   <groupId>org.springframework.cloud</groupId>
+	   <artifactId>spring-cloud-starter-openfeign</artifactId>
+	</dependency>
+
+ 
+-->2.create an interface with @FeignClient annotation
+	
+	like :-
+
+	  @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	  public interface Feignclient_Interaface
+	  {
+
+	  }
+-->3.add method declaration in the interface and annotated with  to which req your sending(patient-registration-service controller whci end point your sending add whole end point url)
+	
+	like:-
+
+	 @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	  public interface Feignclient_Interaface
+	  {
+		@GetMapping("/patient/get-patient-by-id/{id}")
+		public Patient getPatient(@PathVariable("id") long patientId);   -->create dto package->create class Patient(copy Patient in patient-registration-service service fields into this dto Patient class)
+	  }
+	  
+
+4.call the method of interface in  the where we want patient details .
+ 	
+	ex:-here i called in the controller where DoctorConsulatation saved time and i just printed the Patient details came from patient-registration-service micro
+
+	@Autowired
+	private OpenFeign_interface  openFeign_interface;
+
+	/* save DoctorConsultation */
+	@PostMapping("/save-DoctorConsultation")
+	public ResponseEntity<DoctorConsultation> saveDoctorConsultation(
+			@RequestBody DoctorConsultation doctorConsultation) {
+		
+		//called the method in  the interface(OpenFeign_interface) for fetching details from another micro
+		Patient patientDetails = openFeign_interface.getPatientDetails(doctorConsultation.getPatientId());
+		System.out.println(patientDetails);
+
+		DoctorConsultation DoctorConsultation1 = doctorConsultationService.saveConsultation(doctorConsultation);
+
+		if (DoctorConsultation1 != null) {
+
+			return new ResponseEntity<>(DoctorConsultation1, HttpStatus.CREATED);
+		} else {
+		
+			return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+
+		}
+	}
+
+---
+
+
+
+
+
+
+
 Config Server creattion
 ============================================
 -->it is a centralized configurations controller
@@ -173,7 +532,19 @@ spring:
     config:
       server:
         native:
-          search-location: C:\\config #this means we given configurations in the location
+          search-location: C:\\config  # -->this means we given configurations in the location
   profiles:
     active: native
+
+apply below in yml (for which micro-service you want to give config-secer)
+---------------------------------------------------------------------------------
+
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8888"  #--->means form this micro-service properties there like that
+
+
+Note=in our project we given in movie-catalog-service(go and check tha's project)
+---
+
 
