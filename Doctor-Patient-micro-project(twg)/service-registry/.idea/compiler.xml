@@ -9,6 +9,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
         <module name="movie-streaming-service" />
+        <module name="patient-registration-service" />
+        <module name="doctor-consultation-service" />
         <module name="service-registry" />
         <module name="movie-catalog-service" />
       </profile>
@@ -17,8 +19,10 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="api-gateway" options="-parameters" />
+      <module name="doctor-consultation-service" options="-parameters" />
       <module name="movie-catalog-service" options="-parameters" />
       <module name="movie-streaming-service" options="-parameters" />
+      <module name="patient-registration-service" options="-parameters" />
       <module name="service-registry" options="-parameters" />
     </option>
   </component>

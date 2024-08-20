@@ -11,8 +11,6 @@ spring:
             uri:  lb://DOCTOR-CONSULTATION-SERVICE
             predicates:  
                - Path=/doctor/**
-            
-          
 
   application:
     name: api-gateway
@@ -24,4 +22,7 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
       
- 
+management:
+  tracing:
+    sampling:
+      probability: 1.0

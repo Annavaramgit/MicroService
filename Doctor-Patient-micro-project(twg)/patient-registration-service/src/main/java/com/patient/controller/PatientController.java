@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,7 @@ import com.patient.service.PatientServiceInterface;
 
 @RestController
 @RequestMapping("/patient")
+@Slf4j
 public class PatientController {
 
 	public final PatientServiceInterface patientServiceInterface;
@@ -32,7 +34,7 @@ public class PatientController {
 	/* get specific patient details */
 	@GetMapping("/get-patient-by-id/{id}")
 	public ResponseEntity<Patient> getSpecific(@PathVariable long id) {
-
+		log.info("patient-reg-serv controller{}"+id);
 		Patient patient = patientServiceInterface.findSpecific(id);
 		
 		if (patient != null) {

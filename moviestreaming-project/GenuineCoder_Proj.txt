@@ -157,6 +157,41 @@ How to use RestTemplate
 2.use the bean where we need to call another micro-service
 
 
+
+Methods in RestTemplate
+--------------------------------
+1.getForEntity()   => executes a GET request and returns an object of ResponseEntity class,  that contains both the status code and the resource as an object.
+
+2.getForObject()   => similar to getForEntity(), but returns the resource object directly.
+
+3.postForObject()  => creates a new resource using HTTP POST method and returns an entity.
+
+4.postForLocation()  => creates a new resource using the HTTP POST method and returns the location of the newly created resource.
+
+5.delete(url)        => deletes the resource at the specified URL.
+
+6.put(url, request)  =>PUTs the given request object to the URL.
+
+
+
+Note=
+
+-->RestTemplate and FegnClient follows Thread-for-request model  means
+      ==>When you make an HTTP request using RestTemplate or FeignClient, a thread is created (or borrowed from a thread pool) to handle that request.
+
+-->disadvantage of RestTemplate and FeignClient
+    ==>If your application has to handle many concurrent HTTP requests, it will need many threads, 
+          each waiting for a response. This can lead to high memory usage and performance degradation
+
+-->how webclient works
+   ==>webclient folows event-driven model 
+   ==>after we make Http Request then thread initialises the request, means preparing the HTTP request object and sending it over the network.
+   ==>then in the webclient the thread is freed up .the thread will not wait for the response,the request responsibility takes WebClient's reactive framework
+   ==>the thread do other tasks
+   ==>the threads which are availble ,the event loop create task "waiting for response" added in queue
+   ==>the event loop continuely checks incoming events,that means if the requested request got reponse then immediatelty event loop hand-overs the response to avaialble 
+	thread in the task queue
+
 ex:-
 <------------>
 
@@ -290,6 +325,19 @@ How to Use WebClient
 ======================================
 -->it  is also like RestTemplate
 -->but it is asynchronous and we can make this synchronous also
+-->webclient supports Asynchronous and synchrouns also
+
+
+-->how webclient works
+   ==>webclient folows event-driven model 
+   ==>after we make Http Request then thread initialises the request, means preparing the HTTP request object and sending it over the network.
+   ==>then in the webclient the thread is freed up .the thread will not wait for the response,the request responsibility takes WebClient's reactive framework
+   ==>the thread do other tasks
+   ==>the threads which are availble ,the event loop create task "waiting for response" added in queue
+   ==>the event loop continuely checks incoming events,that means if the requested request got reponse then immediatelty event loop hand-overs the response to avaialble 
+	thread in the task queue
+
+
 
 
 1.add webflux dependency
@@ -301,7 +349,7 @@ How to Use WebClient
         </dependency>
 
 
-2.create package->create class->create bean
+2.create package->create class->create bean for webclient
 
 package com.mvstream.config;
 
@@ -328,6 +376,7 @@ public class RestTemplateConfig {
 }
 
 3.call another micro-service using above bean
+
 
 package com.mvstream.controller;
 
@@ -434,11 +483,22 @@ public class MovieStreamingController {
 
 
 
+
+
 How to use OpenFeign
 ==================================
 -->it is also used for make micro-services communicating each other
 -->it is also like RestTemplate and Webcleint
 -->used for make micro-services communicate each other
+-->When we using the Feign, we have to define only the interfaces and annotate them accordingly
+    -->The actual web client implementation is then provided by Spring at runtime
+-->by defauly feignclient also synchronous => means, creates a thread for each request and blocks it until it receives a response.
+
+-->To enable the FeignClient in your application you have to mainly specify two things.
+
+     =>@EnableFeignClients : To apply at starter class 
+     =>@FeignClient(name=”ApplicationName”) : To define an interface for a Consumer
+
 
 Note=this openfeign used in doctor-patient-micro-project(twg) not in this project
 

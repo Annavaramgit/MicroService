@@ -5,17 +5,16 @@ MicroServices
 -->microservices are modern approach in software where by application code devided in small, managable pieces,independent to others.
 -->microservices are small small services they work together 
 -->microservices are loosely coupled ->( meaning that changes to one service should not affect the other services )
--->it is distributed environemt =>not all application code at one place (based on modules devided diff applications)
+-->it is distributed environment =>not all application code at one place (based on modules devided diff applications)
 
 
 Monolith Archetecture
 ===========================
--->Single and large Code Base  => whole code application available at one place
--->Single Stack                =>every modules in the application developed by one progarmming language(like java)
--->one time deployement for entire project=> means in the application if single modules got any issue then project not deployed 
--->tightly coupled =>all modules are tightly coupled each other
+-->Single and large Code Base    => whole code application available at one place
+-->Single Stack                  =>every modules in the application developed by one progarmming language(like java)
+-->tightly coupled               =>all modules are tightly coupled each other
 -->it is centalized environment  =>all application available at one place
-
+-->one time deployement for entire project=> means in the application if single modules got any issue then project not deployed 
 
 MicroServices Communication
 ====================================
@@ -27,8 +26,8 @@ MicroServices Communication
 
 1)Synchronous 
 -----------------
--->it means ,if one micro service send request another micro service 
--->in this sending micro service waits for the second micro service response
+-->it means ,if one micro-service send request to another micro-service 
+-->in this, sending micro-service waits for the second micro-service response(blocking)
 -->RestTemplate,SpringCloud using communications are Synchronous 
 
 ex:
@@ -38,8 +37,8 @@ phone call
 
 2)Asyncronous
 ---------------
--->it means ,if one micro service send request another micro service 
--->sending microservice will not wait for the second micro service for the response
+-->it means ,if one micro-service send request to another micro-service 
+-->sending microservice will not wait for the second micro service for the response(non-blocking)
 -->RabbitMQ,Kafka are the example
 
 ex:
@@ -64,7 +63,7 @@ Api gateway
 
 ConfigServer
 <=============>
---> Actually a multiple micro-servives are develped in the micro-service based application
+--> Actually a multiple micro-servives are developed in the micro-service based application
 -->each micro-service is a application
 -->so each application needs configurations
 -->in ConfigServer means all the micro-services confifgurations are maintained here only
@@ -75,9 +74,9 @@ ConfigServer
 Circuit breaker
 <=====================>
 -->if two micro-services are there(One,Two)
--->if Two micro-service needs One microservice data
--->in case if One micro-service fails or notworking
--->that time we need to handle bcz Two micro-service don't know One micro-service is not working
+-->if Two micro-service needs One-Microservice data
+-->in case if One micro-service fails or not-working
+-->that time we need to handle bcz Two-Micro-service don't know One-Micro-service is not working
 -->for handling this kind of situation Circuit Breaker need to use
 
 message borker
@@ -91,14 +90,14 @@ ex:zomato app
 -->that micro-service intimate to kafka like hey order req came from clinet
 -->then after payment micro-service handles payment process 
 -->then payment handled micro-service intimate to kafka like either payment =sucess or payment=failure
--->based on kafka message sucess failure remaing will happen 
+-->based on kafka message success failure remaing will continue ,etc...
 
 
 service-regstry
 <===================>
--->for communication of micro-service then micro-service n/w location of that commuinicated micro-service then only communicate
--->instaed of hardcoding n/w location use eurka server 
--->euraka server is a service-registry and discovery server or sevice
+-->for communication of micro-services network location is required(servername,portnumber,ect..)
+-->instaed of hardcoding the n/w location use eurka server 
+-->euraka server is a service-registry and discovery server 
 -->when the micro-services running/startup they registed in the euraka server itself then euraka know his n/w location
 -->so through this eureka micro-services communicate each other
 
@@ -107,7 +106,8 @@ OpenFeign
 =======================
 -->it is also like RestTemplate and Webcleint
 -->used for make micro-services communicate each other
-
+-->by default it is synchronous 
+-->it follows thred-per-request model
 
 how to use openfeign
 -----------------------------
@@ -124,12 +124,13 @@ how to use openfeign
 	
 	like :-
 
-	  @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	  @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request or if you use api-gate-way provovide api-gateway application name
 	  public interface Feignclient_Interaface
 	  {
 
 	  }
--->3.add method declaration in the interface and annotated with  to which req your sending(patient-registration-service controller whci end point your sending add whole end point url)
+
+-->3.add method declaration in the interface and annotated with  to which req your sending(patient-registration-service controller which end point your sending add whole end point url)
 	
 	like:-
 
@@ -143,7 +144,7 @@ how to use openfeign
 
 4.call the method of interface in  the where patient details .
  	
-	ex:-here i called in the controller where DoctorConsulatation saved time and i just printed the Patient details came from patient-registration-service micro
+	ex:- here i called in the controller where DoctorConsulatation saved time and i just printed the Patient details came from patient-registration-service micro
 
 	@Autowired
 	private OpenFeign_interface  openFeign_interface;
@@ -171,4 +172,78 @@ how to use openfeign
 
 
 
+---
+
+
+
+distributed tracing with mico-meter and zipkin
+==================================================
+-->distributed tracing means trace the request life-cycle
+-->where req started from to where it's going ,like that,and we can identify in which micro req waited/spent more time,and we can find any bottlenecks ,etc...
+
+1.Micrometer used for genarate tracing
+2.Zipkin used for view the tracing
+
+
+step-bystep
+------------------------
+1.add dependecies
+2.install zipkin
+3.rest api calls & view tracing info
+
+
+
+1.dependencies 
+----------------------
+-->spring-boot-starter-actuator ==>it gives features for monitor and maintain our-application
+-->micro-meter-tracing-bridge-brave  =>maintain tracing info
+-->zipkin-reporter-brave              =>used send data of tracing which stored above dependency 
+
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>    
+</dependency>
+
+yml file
+--------------------
+management:
+   tracing:
+     sampling:
+       probability: 1.0
+
+
+Note= give above dependecies and yml in every micro-service what ever you used(api-gateway,service-registry,doctor-consultation,patient-registration)
+
+
+2.install zipkin
+--------------------------
+-->search in google zipkin download(https://zipkin.io/pages/quickstart.html)
+-->if you are using java 17b or above then we can download zipkin by using java
+quickstart(left side nav bar)
+     |
+   java
+     |
+latest release(click this)
+     |
+it downloaded jar file(open cmd where zipkin jar downloaded folder like downloads)
+     |
+java -jar zipkin-server-3.4.1-exec.jar   ( use this command(here java -jar zipkin_name.jar)  -->for to start zipkin we have to execute this to see tracing
+     |
+it will give url ( http://127.0.0.1:9411/) -->execute this in the browser 
+
+     
+
+Note= to see tracing then evry time need to execute zipkin jar file in cmd then it will give url then run the rest-api's and in the browser zipkin click run the query 
+      then yo will find tracing
 ---

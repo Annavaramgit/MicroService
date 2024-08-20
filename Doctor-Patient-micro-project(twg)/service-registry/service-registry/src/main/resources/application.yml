@@ -16,3 +16,8 @@ logging:
   level:
     com.netflix.eureka: DEBUG # Enable debug-level logging for Eureka
     org.springframework.cloud.netflix.eureka: DEBUG # Enable debug-level logging for Spring Cloud Netflix Eureka
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
