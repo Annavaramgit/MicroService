@@ -563,10 +563,6 @@ Note=this openfeign used in doctor-patient-micro-project(twg) not in this projec
 
 
 
-
-
-
-
 Config Server creattion
 ============================================
 -->it is a centralized configurations controller
@@ -576,7 +572,7 @@ Config Server creattion
 depedencies
 -------------------
 1.confi server
-2.eureka discovery cleint   ->this is for regisre this also in the eureka server
+2.eureka discovery cleint   ->this is for register this also in the eureka server
 
 
 yml file(properties)
@@ -606,5 +602,99 @@ spring:
 
 Note=in our project we given in movie-catalog-service(go and check tha's project)
 ---
+
+
+
+zipkin
+===============
+-->it is a distributed tracing tool type/feature type
+-->distributed tracing means trace the request life-cycle
+-->where req started from to where it's going ,like that,and we can identify in which micro req waited/spent more time,and we can find any bottlenecks ,etc...
+
+1.Micrometer used for genarate tracing
+2.Zipkin used for view the tracing
+
+
+step-bystep
+------------------------
+1.add dependecies
+2.install zipkin
+3.rest api calls & view tracing info
+
+
+
+1.dependencies 
+----------------------
+-->spring-boot-starter-actuator ==>it gives features for monitor and maintain our-application
+-->micro-meter-tracing-bridge-brave  =>maintain tracing info
+-->zipkin-reporter-brave              =>used send data of tracing which stored above dependency 
+
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-tracing-bridge-brave</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.zipkin.reporter2</groupId>
+    <artifactId>zipkin-reporter-brave</artifactId>    
+</dependency>
+
+
+yml file
+--------------------
+management:
+   tracing:
+     sampling:
+       probability: 1.0
+
+
+Note= give above dependecies and yml in every micro-service what ever you used(api-gateway,service-registry,doctor-consultation,patient-registration)
+
+
+2.install zipkin
+--------------------------
+-->search in google zipkin download(https://zipkin.io/pages/quickstart.html)
+-->if you are using java 17b or above then we can download zipkin by using java
+quickstart(left side nav bar)
+     |
+   java
+     |
+latest release(click this)
+     |
+it downloaded jar file(open cmd where zipkin jar downloaded folder like downloads)
+     |
+java -jar zipkin-server-3.4.1-exec.jar   ( use this command(here java -jar zipkin_name.jar)  -->for to start zipkin we have to execute this to see tracing
+     |
+it will give url ( http://127.0.0.1:9411/) -->execute this in the browser 
+
+     
+
+Note= to see tracing then evry time need to execute zipkin jar file in cmd then it will give url then run the rest-api's and in the browser zipkin click run the query 
+      then yo will find tracing
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

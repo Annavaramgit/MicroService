@@ -15,8 +15,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0
+#below are zipkin(distributed tracing purpose)
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0

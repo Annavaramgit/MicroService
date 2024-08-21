@@ -19,8 +19,42 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-
+#below for actuators(we used  in circuit-breaker time)
 management:
-  tracing:
-    sampling:
-      probability: 1.0
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+#below for circuit-breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      doctor-service:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 2  #means after 4 call fail req's circuite breaker tuned on
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s #menas after 5sec circuit breaker tuned into HalfClosed
+        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG
+    org.springframework.cloud.client.loadbalancer: DEBUG
+
+
+#below are zipkin(distributed tracing purpose)
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0

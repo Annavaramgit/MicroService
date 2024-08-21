@@ -2,7 +2,7 @@ spring:
   application:
     name: movie-catalog-service
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: "optional:configserver:http://localhost:8888" # config-server micro runs 8888 in our project
 #config-server i used so that's why no need to mention properties here ,mention in outside(check config server micro service you can understand)
 #  datasource:
 #    url: jdbc:mysql://localhost:3306/angular

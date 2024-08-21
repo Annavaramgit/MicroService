@@ -127,4 +127,10 @@ public class DoctorConsultationController {
 
     }
 
+    /*Get Patient details from patient-registrartion-service*/
+    @GetMapping("/get-patient/{patientId}")
+    public ResponseEntity<Patient> getPatient(@PathVariable long patientId){
+        return new ResponseEntity<>(doctorConsultationService.getPatient(patientId),HttpStatus.OK);
+    }
+
 }

@@ -1,9 +1,53 @@
 spring:
   application:
     name: movie-streaming-service
+
 server:
-  port: 8092
+  port: 8098
+ # port: 0  #dynamically port giving/take at running time (its good pratice)
+
+#below for actuators(we used used in circuit-breaker time)
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+#below for circuit-breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      movie-stream:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 4 #means after 4 call fail req's circuite breaker tuned on
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s #menas after 5sec circuit breaker tuned into HalfClosed
+        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG
+    org.springframework.cloud.client.loadbalancer: DEBUG
+
+#without this properties also its registering bcz of @EnableDiscoveryClient annotation we used
+#if multiple eureka micro's vaialable then we need to give this properties ,bcz ambiguity will come
 #eureka:
 #  client:
 #    server-url:
 #      defaultZone: http://localhost:8761/eureka
+
+#the below 4 lines for zipkin tracing pupose
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0

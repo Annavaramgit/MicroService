@@ -13,4 +13,4 @@ spring:
         native:
           #search-locations: file:///C:/config
            search-locations: file:///C:\Users\Sreenivas Bandaru\Documents\Microservices\MicroService\moviestreaming-project\config
-
+#the above search location means in that file configurations are availble

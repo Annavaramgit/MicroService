@@ -23,6 +23,7 @@ public class MovieStreamingController {
     /* Main directory of the video*/
     public static final String VIDEO_DIRECTORY = "C:\\Users\\Sreenivas Bandaru\\Documents\\Microservices\\";
 
+    /*dependecy injecting */
     public final CallMovieCatalogInfo callMovieCatalogInfo;
     public MovieStreamingController(CallMovieCatalogInfo callMovieCatalogInfo) {
         this.callMovieCatalogInfo = callMovieCatalogInfo;
@@ -52,6 +53,10 @@ public class MovieStreamingController {
         String moviePath = callMovieCatalogInfo.getMoviePath(id);
         log.info("Path Is--->{}"+moviePath);
         /* this calls above method along with passing video path */
+        if (moviePath.startsWith("something went wrong")) {
+            // Return an appropriate response for the error
+            return ResponseEntity.status(503).body(null);
+        }
         return streamVideo(moviePath);
 
 

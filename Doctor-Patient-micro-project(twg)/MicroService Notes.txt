@@ -247,3 +247,158 @@ it will give url ( http://127.0.0.1:9411/) -->execute this in the browser
 Note= to see tracing then evry time need to execute zipkin jar file in cmd then it will give url then run the rest-api's and in the browser zipkin click run the query 
       then yo will find tracing
 ---
+
+
+
+Circuit breaker
+========================
+-->circuit breaker means 
+-->while micro-services communicating each other if the called micro-service(server) is unable to give response or stopped 
+-->then this calling micro-service (client) either need to wait for the response or handle that situation
+-->here handling that situation we use circuit breaker
+-->in our project we used resilience4j for circuit breaker
+
+(if server micro-service)unable to respond then instead of giving 503 error provide meaning relavent response==>simply means
+
+Circuit Breaker has three states:
+------------------------------------------------------
+ Closed, Open, and Half_Open
+
+Closed
+-------
+-->Closed is the initial state of circuit breaker. When microservices run and interact smoothly, circuit breaker is Closed.
+(when micro-services comunication is fine then circuit-breaker is on CLOSED state)
+
+
+Open
+---------
+-->when called micro(server) not giving response (may be timeout or down) that means failed(503 error came)
+-->actually we configured in propertied or yml =>if requests failes 50% then open the circuit breaker
+  -->we provide threshold value (like total 4 req ,if 50% req's means 2 req failed then circuit breaker turned into OPEN)
+
+
+
+HalfOpen
+----------
+-->actually in micro-service based applications dwoning server adfter some time working fine is common
+  -->not all the time micro-service down
+-->so,we also configure is after some time circuitbreaker turned into HALF-BREAKER
+  -->HALF-BREAKER means it checks/allows limited requests 
+  -->if the that limnited request working fine then circuit breaker turned into CLOSE 
+  -->if that limited requests are not working fine then  circuit breaker turned again into OPEN
+
+#below for circuit-breaker yml/properties
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      doctor-service:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 4  #means after 4 call fail req's circuite breaker tuned on
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s #menas after 5sec circuit breaker tuned into HalfClosed
+        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+
+1.add dependencies
+-----------------------------
+<dependency>
+<groupId>io.github.resilience4j</groupId>
+<artifactId>resilience4j-spring-boot3</artifactId>
+<version>2.2.0</version>
+</dependency>
+
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+Note:-actuator here for to see circuitbreaker status(health of apllication
+
+2.use @circuitbreaker annotation and fallbackmethod 
+-------------------------------------------------------------
+Like below:-
+
+    @Override
+    @CircuitBreaker(name = "doctor-service", fallbackMethod = "circuitBreakerHandler")
+    public Patient getPatient(long patientId) {
+
+        Patient patientDetails = openFeign_interface.getPatientDetails(patientId);
+        log.info("This is doctor-service service getpateint" + patientDetails);
+        return patientDetails;
+    }
+
+   /*this is will trigger when server unable to give response ,here i passed null's instead of error*/
+    public Patient circuitBreakerHandler(long patientId, Throwable e) {
+        log.info("This circuitBreakerHandler");
+
+        Patient patient = new Patient();
+        patient.setId(0);
+        patient.setName(null);
+        patient.setContact(null);
+        patient.setDetails(null);
+        return patient;
+
+    }
+Note=fallbackmethod(circuitBreakerHandler())must have return type of what the end point method have return type(in this example Patient is the return type of both)
+
+3.yml file /properties
+-------------------------------
+spring:
+  application:
+    name: movie-streaming-service
+
+server:
+  port: 8098
+ # port: 0  #dynamically port giving/take at running time (its good pratice)
+
+#below for actuators(we used used in circuit-breaker time)
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+#below for circuit-breaker
+resilience4j:
+  circuitbreaker:
+    instances:
+      movie-stream:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 4 #means after 4 call fail req's circuite breaker tuned on
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s #menas after 5sec circuit breaker tuned into HalfClosed
+        permittedNumberOfCallsInHalfOpenState: 2
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+logging:
+  level:
+    org.springframework.cloud.netflix.eureka: DEBUG
+    org.springframework.cloud.client.loadbalancer: DEBUG
+
+#without this properties also its registering bcz of @EnableDiscoveryClient annotation we used
+#if multiple eureka micro's vaialable then we need to give this properties ,bcz ambiguity will come
+#eureka:
+#  client:
+#    server-url:
+#      defaultZone: http://localhost:8761/eureka
+
+#the below 4 lines for zipkin tracing pupose
+#management:
+#  tracing:
+#    sampling:
+#      probability: 1.0
+---
