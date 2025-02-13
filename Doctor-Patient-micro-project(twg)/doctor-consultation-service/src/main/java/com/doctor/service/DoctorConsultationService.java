@@ -16,4 +16,5 @@ public interface DoctorConsultationService {
 	public DoctorConsultation  findSpecific(long id);
 	public List<DoctorConsultation> findByPatientId(long patientId);
 	public Patient getPatient(long patientId);
+	public Patient savePatientInRegistration(Patient patient);
 }

@@ -36,7 +36,7 @@ public class DoctorConsultationController {
         this.openFeign_interface = openFeign_interface;
     }
 
-    /* save DoctorConsultation*/
+    /* save DoctorConsultation*//*
     @PostMapping("/save-DoctorConsultation")
     public ResponseEntity<DoctorConsultation> saveDoctorConsultation(
 
@@ -59,6 +59,7 @@ public class DoctorConsultationController {
 
         }
     }
+    */
 
     /*for asynchronous fienclient http calls*/
     /*
@@ -133,4 +134,10 @@ public class DoctorConsultationController {
         return new ResponseEntity<>(doctorConsultationService.getPatient(patientId),HttpStatus.OK);
     }
 
+    @PostMapping("/save-patient")
+    public ResponseEntity<Patient> savePatientDetails(@RequestBody Patient patient) {
+        log.info("entered......");
+        Patient savedPatient = doctorConsultationService.savePatientInRegistration(patient);
+        return ResponseEntity.ok(savedPatient);
+    }
 }

@@ -74,8 +74,9 @@ public class DoctorConsultationServiceImpl implements DoctorConsultationService 
         return repo.findByPatientId(patientId);
     }
 
+    //open feign used here
     @Override
-    @CircuitBreaker(name = "doctor-service", fallbackMethod = "circuitBreakerHandler")
+    //@CircuitBreaker(name = "doctor-service", fallbackMethod = "circuitBreakerHandler")
     public Patient getPatient(long patientId) {
 
         Patient patientDetails = openFeign_interface.getPatientDetails(patientId);
@@ -93,6 +94,12 @@ public class DoctorConsultationServiceImpl implements DoctorConsultationService 
         patient.setDetails(null);
         return patient;
 
+    }
+
+    //this is save patient details in the patient-related db from doctor-consultation service
+    public Patient savePatientInRegistration(Patient patient) {
+        log.info("entered...");
+        return openFeign_interface.savePatient(patient);  // Call the patient registration service
     }
 
 }

@@ -3,7 +3,7 @@
 MicroServices
 ======================
 
--->microservices are modern approach in software where by application code devided in small, managable pieces,independent to others.
+-->microservices are architectural patteren/modern approach in software where by application code devided in small, managable pieces,independent to others.
 -->microservices are small small services they work together 
 -->microservices are loosely coupled ->( meaning that changes to one service should not affect the other services )
 -->it is distributed environment =>not all application code at one place (based on modules(buiseness logic) devided diff applications)
@@ -110,6 +110,8 @@ eureka:
 -->every request come to api-gateway first  and then it will route correspondent micro-service
 -->Api Gateway simplifies complexity of client & microservices communication
 -->api-wateway is responsile to route the request to correspondent micro-service
+-->if my application have 100 micro-services then all micro's have diffrent port numbers so the it is very complex to 
+    remember the client all micro's port numbers if we use api-gate way we can access any micro with api-gateway port number
 
 How to Implement Api-gateway
 <------------------------------------>
@@ -205,13 +207,13 @@ spring:
 -->then this calling micro-service (client) either need to wait for the response or handle that situation
 -->here handling that situation we use circuit breaker
 -->in our project we used resilience4j for circuit breaker
+*-->To prevent cascading failures when one microservice is down or slow
 
-
-(if server micro-service)unable to respond then instead of giving 503 error provide meaning relavent response==>simply means
+(if server micro-service)unable to respond then instead of giving 503(Unavaialble) error provide meaning relavent response==>simply means
 
 Circuit Breaker has three states:
 ------------------------------------------------------
- Closed, Open, and Half_Open
+ Closed, Open, and Half_Open 
 
 Closed
 -------
@@ -362,7 +364,7 @@ logging:
 ex:zomato app
 ------------------
 -->first order request came to one micro-service 
--->that micro-service intimate to kafka like hey order req came from clinet
+-->that micro-service intimate to kafka like hey order req came from client
 -->then after payment micro-service handles payment process 
 -->then payment handled micro-service intimate to kafka like either payment =sucess or payment=failure
 -->based on kafka message success failure remaing will continue ,etc...
@@ -373,7 +375,7 @@ ex:zomato app
 6.Distributed tracing with mico-meter and zipkin
 ==================================================
 -->distributed tracing means trace the request life-cycle
--->we trace how request traversing through variuos micro-services
+-->we trace how request traversing through various micro-services
 -->where req started from to where it's going ,like that,and we can identify in which micro req waited/spent more time,and we can find any bottlenecks ,etc...
 
 below used for distributed tracing
@@ -457,9 +459,9 @@ Micro-service communication using
 1.RestTemplate
 <==========================>
 -->RestTemplate is a class by  using this we can make two or more micro-services communicate each other
--->it  is snchronous
+-->it  is synchronous
 -->it follow Thread-for-request model(for every req thread created)
--->it comes eith spring-boot-starter-web dependency
+-->it comes with spring-boot-starter-web dependency
 
 How to use RestTemplate
 =================================
@@ -470,11 +472,11 @@ How to use RestTemplate
 
 Methods in RestTemplate
 --------------------------------
-1.getForEntity()   => executes a GET request and returns an object of ResponseEntity class,  that contains both the status code and the resource as an object.
+1.getForEntity()     => executes a GET request and returns an object of ResponseEntity class,  that contains both the status code and the resource as an object.
 
-2.getForObject()   => similar to getForEntity(), but returns the resource object directly.
+2.getForObject()     => similar to getForEntity(), but returns the resource object directly.
 
-3.postForObject()  => creates a new resource using HTTP POST method and returns an entity.
+3.postForObject()    => creates a new resource using HTTP POST method and returns an entity.
 
 4.postForLocation()  => creates a new resource using the HTTP POST method and returns the location of the newly created resource.
 
@@ -655,7 +657,9 @@ how to use openfeign
 	
 	like :-
 
-	  @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request or if you use api-gate-way provovide api-gateway application name
+	
+         // @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request or if you use api-gate-way provovide api-gateway application name
+          @FeignClient(name="patient-registration-service" url="base_url")//if not using eureka
 	  public interface Feignclient_Interaface
 	  {
 
@@ -665,7 +669,7 @@ how to use openfeign
 	
 	like:-
 
-	 @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request
+	 @FeignClient("patient-registration-service") -->need to mention which micro-service you want send the request,if eureka not used then specify url(in the arguments of annotation)
 	  public interface Feignclient_Interaface
 	  {
 		@GetMapping("/patient/get-patient-by-id/{id}")
@@ -707,7 +711,7 @@ how to use openfeign
 3.WebClient
 ====================
 
--->it  is also like RestTemplate
+-->it  is also a class like RestTemplate
 -->but it is both Synchronous and Asynchronous 
 
 
