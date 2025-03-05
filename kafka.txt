@@ -1,0 +1,235 @@
+what is kafka
+======================
+->kafka is a distributed event streaming platform used to handle large amount of real-time data effeciently.
+->in simple terms , kafka is like message broker that allows different applications(producers and consuemers)
+  to communicate with each other asynchronously.
+->kafka used for real time communication b/w micro-services.
+->supports multiple consumers reading the same event stream simultaneously.
+
+
+simple ex scenario:-
+<----------------------->
+->when user place an order,kafka sends the event to different services like payment,inventory, and shipping.
+->each service consumes the relavent data and processes it asynchronously.
+ 
+=>below real time
+uber:-live tracking of rides,driver updates
+twitter(x):-processing millions of tweets per second
+netflix:- real time recommendations & log processing
+linkedin :- one person post can see by multiple people  etc.....
+
+
+what is event streaming
+===============================
+->event streaming is the process of continually capturing,processing data as it happens in real-time.
+   instead of waiting for data to be collected in batches, systems can react events immediately as they occur.
+->ex: in swiggy if put order
+   =>event is sent to kafka
+   =>kafka streams the event in real-time to diff sevices:
+     =>payment services
+     =>restaurant service
+     =>delivery service etc...
+  =>all services react instantly instead of waiting for batch processing.
+->simply event streaming means each service listen to new events and acts immediately.
+
+
+
+what is distributed event streaming
+===========================================
+->distrubuted streaming events means capturing,processing , and reacting to events in real-time across multiple servers
+->instead of handling events in single mechine , the work load is spread across mechines to improve scalability ,fault tolerance, performance.
+->simply d-e-s means ream-time event processing across multiple mechines.
+
+
+
+
+Architecture of kafka
+================================
+
+
+       	     ___________________
+	     | broker    broker |
+producer  -->| 			|  -->consumer
+	     |			|
+producer  -->|   broker		|  -->consumer
+	     |       		|
+producer  -->|         broker	|  -->consumer
+	     |			|
+	     |__________________|			|
+                   CLUSTER
+
+Note:- cluster =>group of servers  , broker =>one kafka server
+
+
+Message
+<---------------->
+->A message is the data send by the producer and stored within kafka.(form of byte array)
+->a message has 
+  =>key(optional)               - keys are used when ordering or grouping related data.
+  =>value                       - actual data that is transmitted. can be xml,json,string ,etc..
+  =>timestamp(optional)         - use for tracking when the event occured.
+  =>compression type(optional)
+  =>Headers(optional)
+  =>partition and offsetid**     - once the message is reaches the kafka topic,gets a partitions number and offset id that is stored within message.
+                                   (it is imp,bcz if producer produced then message then msg will get offset suppose 1,next msg 2,next 3, then consumer consumed upto 3
+				   and again producer produces msg's now here consumer if starts based offset id consumer continue consuming,and also used for
+        			   where producer need to store based on this id it will only store).
+
+Note : in a partition each msg is assigned an increment id, called as offset.
+
+
+
+Topic   -->patition 0   0 1 2 3 4 ...n  (offset values,each time msg's stores after icrement(offset))
+	-->partition1	0 1 2 3 ...n
+	-->partition2	0 1 2 3 4 ...n
+
+
+producer
+<----------->
+->sends messages to kafka topic
+
+
+broker
+<----------->
+->single kafka server
+
+
+consumer
+<----------->
+->reads messages from kafka using topic name.
+->consumer read messages in order they were produced.
+->consumers can keep track of the position by offset that they consumed.
+ (means suppose consumed upto 3 offset id and msg's completed, if producer again produced upto 10 ,here consumer can 
+  start from offset id 4 (here consumer track position by offset id)).
+
+consumer group
+<<----------------->>
+->evry cosnumer is a part of consumer group.
+->cosumers within the a group work together to consume a topic 
+->each partition is only consumed by one member of consumer group
+  (means if in group one consumer consumes another can use same not allowed to consume again from partition
+         or 
+   No two consumers in the same group can read the same partition at the same time)
+->Different consumer groups can consume the same partition independently.
+->eg: payament related services(which consume one) make one group so duplication of consuming we can save.
+
+what is zookeeper
+<--------------------->
+->used to manage and maintain all the bokers in the cluster.
+->kafka cannot run without zookeeper(unless using KRaft in newer versions).
+->It handles failures by ensuring another broker takes over if one fails.
+->a cluster have multiple zookeepers (usually 3 to 5).
+
+
+what is topic
+<--------------------->
+->it is a logical container where events(messages) are stored.
+->topic is like a folder events/messages are stored 
+->topics can be partitioned to handle large-scale data.
+->each topic has name and multiple partitions.
+->topic name should be unique , in one broker any no.of topics can be allowed.
+->Each topic partition has a leader and multiple replicas
+  (if any broker down,this replicas will be use,if topic 1 have 1 partion we can configure that patition have 2 replicas in another topic or another broker)
+   (the original one is called leader,if that is down zookeeper elect another leader in replica)
+
+->eg: banking app have diff topic
+  1.transactions =>stores money transfers.
+  2.alerts       =>stores fraud alerts.
+
+
+
+Note : 
+=>while creating the topic,provide a replication factor value.
+=>if a broker goes down ,its topic replication from another broker can solve crisis.
+=>what ever msg's there in leader automatically there in replica's
+
+1.when creating topic we have to provide replica factor(suppose 2)
+2.when producer produce msg we have to give topic name so after producer take meta data
+(this meta data have info which broker is leader for each partition etc ..)then producer produce msg into that leader 
+3.if that broker goes down zookeeper come into picture and elect another broker as leader and producer produce msg into new leader broker partition
+4.if another leader elected previous offset id will continue
+5.consumer also consumes msg's from leader broker.
+
+
+what is partition
+<--------------------->
+->splits a topic into multiple segments to allow parllel processing.
+->topics are devided into partitions for parllel processing.
+->each partition is  stored in one broker but can have replicas in others.
+->partition allow kafka to process events fatser by splitting the data.
+
+->eg : stoke market app has topic stoke_prices,it can have 3 partitions
+  telsa prices,hyundai prices,tata prices.
+
+
+how to download and run kafka
+======================================
+->there are two ways for run kafka
+1.either follow  docker(need to two commands after docker up and run)
+2.manually download kafka
+
+docker using 
+<--------------->
+docker pull apache/kafka:3.9.0               ->install kafka
+docker run -p 9092:9092 apache/kafka:3.9.0   ->start kafka in docker container
+
+Note :- docker should up and run,we can execute above in system cmd
+
+
+
+Manually downloading and running kafka
+<----------------------------------------->
+step 1 : visit below  website
+https://kafka.apache.org/downloads 
+
+step 2 : download => Scala 2.12  - kafka_2.12-3.9.0.tgz (asc, sha512) (click on this)
+
+step 3 : tar file will come extract it 
+
+step 4 : create kafka folder directly in c drive (bcz maintain kafka extracted files in another path not support,long path error will come)
+
+step 5 : afetr tar extract folder will come copy that folder and paste inside kafka folder created in  c drive .
+
+step 6 : create data/zookeeper inside kafka folder, 
+
+step 7 : open config(in extracted folder) and open zookeeper.propeties and change dataDir(dataDir=C:\Users\Sreenivas Bandaru\kafka3\data\zookeeper)
+
+step 8 : open cmd(for extracted folder) run below command in different cmd's(one is for zookeeper,one is for kafka)
+
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties ->to run zookeeper
+.\bin\windows\kafka-server-start.bat .\config\server.properties        ->to run kafka
+
+Note
+---------
+if while running kafka time if get below error
+'wmic' is not recognized as an internal or external command, operable program or batch file.  
+then  set below in environment variables (open env var ->click path->edit->new->paste below->ok->ok)
+C:\Windows\System32\wbem
+
+
+
+
+kafka-topics.bat --create --topic firstTopic  --bootstrap-server localhost:9092                                          ->create topic (we have to execute this inside bin/windows path cmd)
+C:\kafka3\kafka_2.12-3.9.0\bin\windows>kafka-topics.bat --create --topic firstTopic  --bootstrap-server localhost:9092   ->like this
+
+kafka-topics.bat --create --topic firstTopic1 --bootstrap-server localhost:9092 --replication-factor 3 --partitions 1    ->create topic with replicas
+
+C:\kafka3\kafka_2.12-3.9.0\bin\windows>kafka-topics.bat --list --bootstrap-server localhost:9092                         ->to know how many topics there   (below are o/p names of all topics)                   
+firstTopic 
+firsthgfhghtopic 
+firsttopic 
+secondTopic   
+
+kafka-topics.bat --describe --topic firstTopic  --bootstrap-server localhost:9092                                        ->to get description of particular topic
+
+
+kafka-console-producer.bat --topic firstTopic --bootstrap-server localhost:9092                                          ->producer producing msgs(greater than symbols come add msg press enter,continually it will take)
+
+kafka-console-consumer.bat --topic firstTopic --bootstrap-server localhost:9092                                          ->consumer consumes msgs 
+
+kafka-console-producer.bat --topic firstTopic --bootstrap-server localhost:9092 --from-beginning                         ->consumer consumes msgs from 1st msg onwards it will consume.
+
+
+
+
+
