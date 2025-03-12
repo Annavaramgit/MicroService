@@ -190,11 +190,7 @@ step 4 : create kafka folder directly in c drive (bcz maintain kafka extracted f
 
 step 5 : afetr tar extract folder will come copy that folder and paste inside kafka folder created in  c drive .
 
-step 6 : create data/zookeeper inside kafka folder, 
-
-step 7 : open config(in extracted folder) and open zookeeper.propeties and change dataDir(dataDir=C:\Users\Sreenivas Bandaru\kafka3\data\zookeeper)
-
-step 8 : open cmd(for extracted folder) run below command in different cmd's(one is for zookeeper,one is for kafka)
+step 6 : open cmd(for extracted folder) run below command in different cmd's(one is for zookeeper,one is for kafka)
 
 .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties ->to run zookeeper
 .\bin\windows\kafka-server-start.bat .\config\server.properties        ->to run kafka
@@ -202,8 +198,9 @@ step 8 : open cmd(for extracted folder) run below command in different cmd's(one
 Note
 ---------
 if while running kafka time if get below error
-'wmic' is not recognized as an internal or external command, operable program or batch file.  
+'wmic' is not recognized as an internal or external command, operable program or batch () file.  
 then  set below in environment variables (open env var ->click path->edit->new->paste below->ok->ok)
+https://certsteacher.com/free-c8-cp-dv-questions/write/0143
 C:\Windows\System32\wbem
 
 
@@ -227,7 +224,23 @@ kafka-console-producer.bat --topic firstTopic --bootstrap-server localhost:9092 
 
 kafka-console-consumer.bat --topic firstTopic --bootstrap-server localhost:9092                                          ->consumer consumes msgs 
 
-kafka-console-producer.bat --topic firstTopic --bootstrap-server localhost:9092 --from-beginning                         ->consumer consumes msgs from 1st msg onwards it will consume.
+kafka-console-consumer.bat --topic firstTopic --bootstrap-server localhost:9092 --from-beginning                         ->consumer consumes msgs from 1st msg onwards it will consume.
+
+
+
+
+@Bean
+public NewTopic topic(){
+return TopicBuilder.name("topic_name");
+}
+
+
+
+
+
+
+
+
 
 
 
